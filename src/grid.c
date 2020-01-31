@@ -130,21 +130,8 @@ int main(void)
 
 		for(uint16_t i = 0U; i < POINT_COUNT; ++i)
 		{
-			filledCircleRGBA(render, points[i].x, points[i].y, 1U, 255U, 24U, 24U, 222U);
+			filledCircleRGBA(render, points[i].x, points[i].y, 2U, 255U, 24U, 24U, 222U);
 		}
-
-		// Clear the vector and the quadtree, insert points every frame.
-		// FIXME Now it just deinits the qt and inits again, make a qt_clear() function
-		// which leaves the first node intact, deletes just the children
-		qt_destroy(game.qt);
-		qt_init(&game.qt, QT_RECT);
-		vec_clear(&qt_frect_vec);
-		vec_clear(&queried_points);
-
-		insertPointsIntoQT(game.qt, points);
-		getFRect(&qt_frect_vec, game.qt);
-
-		qt_getPointsInCircle(game.qt, &query_circle, &queried_points);
 
 		if(draw_grid)
 		{
@@ -153,23 +140,29 @@ int main(void)
 		}
 
 		// Draw a circle at the mouse as the query boundary
-		query_circle.x = mouse.x + 0.f;
-		query_circle.y = mouse.y + 0.f;
-		circleRGBA(
-			render, query_circle.x, query_circle.y, query_circle.r, 140, 24, 220, 254);
+		// TODO Add life to this part
+		// Make every particle check every other particle
 
-		// Draw the queried points
-		SDL_SetRenderDrawColor(render, 2, 255, 3, 254);
-		for(uint16_t i = 0U; i < queried_points.length; ++i)
+		// Clear the vector and the quadtree, insert points every frame.
+		// FIXME Now it just deinits the qt and inits again, make a qt_clear() function
+		// which leaves the first node intact, deletes just the children
+		qt_destroy(game.qt);
+		qt_init(&game.qt, QT_RECT);
+		vec_clear(&qt_frect_vec);
+
+		insertPointsIntoQT(game.qt, points);
+		getFRect(&qt_frect_vec, game.qt);
+		query_circle.x = mouse.x;
+		query_circle.y = mouse.y;
+		filledCircleRGBA(render, query_circle.x, query_circle.y, 5U, 8U, 236U, 18U, 204U);
+
+		vec_clear(&queried_points);
+		qt_getPointsInCircle(game.qt, &query_circle, &queried_points);
+		for(int j = 0U; j < queried_points.length; ++j)
 		{
-			filledCircleRGBA(render,
-							 queried_points.data[i].x,
-							 queried_points.data[i].y,
-							 1U,
-							 3U,
-							 255U,
-							 4U,
-							 254U);
+			Point diff = makePoint(mouse.x - queried_points.data[j].x,
+								   mouse.y - queried_points.data[j].y);
+			applyForce(&queried_points.data[j], &diff);
 		}
 
 		SDL_RenderPresent(render);

@@ -65,7 +65,7 @@ void generatePoints(void)
 {
 	for(uint16_t i = 0; i < POINT_COUNT; ++i)
 	{
-		points[i] = (SDL_FPoint){rand() % WIDTH + 0.f, rand() % HEIGHT + 0.f};
+		points[i] = (Point){rand() % WIDTH + 0.f, rand() % HEIGHT + 0.f};
 	}
 }
 
@@ -76,6 +76,12 @@ void randomizePoints(void)
 		points[i].x = rand() % WIDTH;
 		points[i].y = rand() % HEIGHT;
 	}
+}
+
+void applyForce(Point* const point, const Point* const force)
+{
+	point->x += force->x;
+	point->y += force->y;
 }
 
 #endif
