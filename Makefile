@@ -13,7 +13,7 @@ clean:
 bin/vec.o: src/vec.c src/vec.h
 	$(CC) -c -o bin/vec.o src/vec.c -O3 -g
 
-build: bin/vec.o
+build: bin/vec.o src/grid.c src/game.h
 	mkdir -p src bin && $(CC) -o bin/$(EXE) src/grid.c bin/vec.o $(CFLAGS) $(CLIBS)
 
 run: bin/$(EXE)
