@@ -14,7 +14,7 @@ clean:
 	$(CC) -c -o ../bin/vec.o vec.c -O3 -g
 
 build: ../bin/vec.o
-	$(CC) -o ../bin/$(EXE) grid.c ../bin/vec.o $(CFLAGS) $(CLIBS)
+	mkdir -p ../bin && $(CC) -o ../bin/$(EXE) grid.c ../bin/vec.o $(CFLAGS) $(CLIBS)
 
 run: ../bin/$(EXE)
 	../bin/$(EXE)

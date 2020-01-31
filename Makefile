@@ -14,4 +14,4 @@ bin/vec.o: src/vec.c src/vec.h
 	$(CC) -c -o bin/vec.o src/vec.c -O3 -g
 
 build: bin/vec.o
-	$(CC) -o bin/$(EXE) src/grid.c bin/vec.o $(CFLAGS) $(CLIBS)
+	mkdir -p src bin && $(CC) -o bin/$(EXE) src/grid.c bin/vec.o $(CFLAGS) $(CLIBS)
