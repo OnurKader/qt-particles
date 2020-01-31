@@ -15,3 +15,6 @@ bin/vec.o: src/vec.c src/vec.h
 
 build: bin/vec.o
 	mkdir -p src bin && $(CC) -o bin/$(EXE) src/grid.c bin/vec.o $(CFLAGS) $(CLIBS)
+
+run: bin/$(EXE)
+	bin/$(EXE)
