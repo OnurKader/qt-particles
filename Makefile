@@ -5,7 +5,7 @@ EXE=main
 
 .PHONY: all vec build clean
 
-all: clean build
+all: build
 
 clean:
 	rm -f bin/*

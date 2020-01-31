@@ -1,9 +1,9 @@
 #include "game.h"
 
-#define QUERY 1
-
 // Define an SDL_FRect vector
 typedef vec_t(SDL_FRect) vec_frect_t;
+
+static const Rect QT_RECT = {0.f, 0.f, WIDTH, HEIGHT};
 
 // Function to get the rectangular boundaries from QT and put them into a
 // SDL_FRect vector
@@ -63,11 +63,7 @@ int main(void)
 	Uint32 fps_timer = SDL_GetTicks();
 
 	// Query boundary
-#if !QUERY
-	Rect query_rect = (Rect){WIDTH / 2.f, HEIGHT / 2.f, 200, 200};
-#else
 	Circle query_circle = (Circle){WIDTH / 2.f, HEIGHT / 2.f, 125};
-#endif
 
 	bool draw_grid = true;
 
@@ -125,35 +121,6 @@ int main(void)
 							vec_clear(&queried_points);
 							break;
 						case SDLK_g: draw_grid = !draw_grid; break;
-						case SDLK_i:
-						{
-							Uint32 start_time = SDL_GetTicks();
-							/* qt_clear(game.qt, 0U); */
-							qt_destroy(game.qt);
-							const Rect qt_rect = makeRect(0.f, 0.f, WIDTH, HEIGHT);
-							qt_init(&game.qt, qt_rect);
-							vec_clear(&qt_frect_vec);
-							vec_clear(&queried_points);
-							printf("\033[4HDestroy-Init:%3u ms\n",
-								   SDL_GetTicks() - start_time);
-							insertPointsIntoQT(game.qt, points);
-							printf("\033[1HPoint insertion to qt took: %u ms\n",
-								   SDL_GetTicks() - start_time);
-							start_time = SDL_GetTicks();
-							getFRect(&qt_frect_vec, game.qt);
-							printf("\033[2HGetting boundaries took   : %u ms\n",
-								   SDL_GetTicks() - start_time);
-							break;
-						}
-						case SDLK_s: vec_clear(&queried_points); count = 0ULL;
-#if !QUERY
-							qt_getPointsInRect(game.qt, &query_rect, &queried_points);
-#else
-							qt_getPointsInCircle(game.qt, &query_circle, &queried_points);
-#endif
-							printf("\033[3HCount:%4u\n", count);
-							break;
-						default: break;
 					}
 					break;
 				case SDL_MOUSEMOTION: mouse = (SDL_Point){e.motion.x, e.motion.y}; break;
@@ -161,73 +128,35 @@ int main(void)
 			}
 		}
 
-		// Handle WASD / Arrow Keys
-		/* const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL); */
-		/* if(currentKeyStates[SDL_SCANCODE_UP]) */
-		/* { */
-		/* 	printf("UP!\n"); */
-		/* } */
-		/* else if(currentKeyStates[SDL_SCANCODE_DOWN]) */
-		/* { */
-		/* 	printf("DOWN!\n"); */
-		/* } */
-		/* else if(currentKeyStates[SDL_SCANCODE_LEFT]) */
-		/* { */
-		/* 	printf("LEFT!\n"); */
-		/* } */
-		/* else if(currentKeyStates[SDL_SCANCODE_RIGHT]) */
-		/* { */
-		/* 	printf("RIGHT!\n"); */
-		/* } */
-
-		/* SDL_SetRenderDrawColor(render, 255U, 24U, 24U, 254U); */
-		/* SDL_RenderDrawPointsF(render, points, POINT_COUNT); */
 		for(uint16_t i = 0U; i < POINT_COUNT; ++i)
 		{
 			filledCircleRGBA(render, points[i].x, points[i].y, 1U, 255U, 24U, 24U, 222U);
 		}
 
 		// Clear the vector and the quadtree, insert points every frame.
-		Uint32 start_time = SDL_GetTicks();
+		// FIXME Now it just deinits the qt and inits again, make a qt_clear() function
+		// which leaves the first node intact, deletes just the children
 		qt_destroy(game.qt);
-		const Rect qt_rect = makeRect(0.f, 0.f, WIDTH, HEIGHT);
-		qt_init(&game.qt, qt_rect);
-		printf("\033[4HDestroy-Init took: %2u ms ", SDL_GetTicks() - start_time);
+		qt_init(&game.qt, QT_RECT);
 		vec_clear(&qt_frect_vec);
 		vec_clear(&queried_points);
 
-		start_time = SDL_GetTicks();
 		insertPointsIntoQT(game.qt, points);
-		printf("\033[1HPoint insertion to qt took: %u ms\n", SDL_GetTicks() - start_time);
-		start_time = SDL_GetTicks();
 		getFRect(&qt_frect_vec, game.qt);
-		printf("\033[2HGetting boundaries took   : %u ms\n", SDL_GetTicks() - start_time);
 
-#if !QUERY
-		qt_getPointsInRect(game.qt, &query_rect, &queried_points);
-#else
 		qt_getPointsInCircle(game.qt, &query_circle, &queried_points);
-#endif
 
 		if(draw_grid)
 		{
-			SDL_SetRenderDrawColor(render, 183U, 183U, 64U, 100U);
+			SDL_SetRenderDrawColor(render, 183U, 183U, 64U, 99U);
 			SDL_RenderDrawRectsF(render, qt_frect_vec.data, qt_frect_vec.length);
 		}
 
-#if !QUERY
-		// Draw a rectangle at the mouse as the query boundary
-		query_rect.x = mouse.x - 100.f;
-		query_rect.y = mouse.y - 100.f;
-		SDL_SetRenderDrawColor(render, 140, 24, 220, 254);
-		SDL_RenderDrawRectF(render, &query_rect);
-#else
 		// Draw a circle at the mouse as the query boundary
 		query_circle.x = mouse.x + 0.f;
 		query_circle.y = mouse.y + 0.f;
 		circleRGBA(
 			render, query_circle.x, query_circle.y, query_circle.r, 140, 24, 220, 254);
-#endif
 
 		// Draw the queried points
 		SDL_SetRenderDrawColor(render, 2, 255, 3, 254);
@@ -249,7 +178,7 @@ int main(void)
 		if(frame_count % 6 == 0)
 		{
 			fps = getFPS(fps_timer, SDL_GetTicks());
-			printf("\033[5HFPS:%3d\n", fps);
+			printf("\033[1HFPS:%3d\n", fps);
 		}
 	}
 
