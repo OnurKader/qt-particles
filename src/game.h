@@ -64,9 +64,7 @@ SDL_FPoint points[POINT_COUNT];
 void generatePoints(void)
 {
 	for(uint16_t i = 0; i < POINT_COUNT; ++i)
-	{
 		points[i] = (Point){rand() % WIDTH + 0.f, rand() % HEIGHT + 0.f};
-	}
 }
 
 void randomizePoints(void)

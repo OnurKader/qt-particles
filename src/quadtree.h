@@ -15,14 +15,15 @@
 
 typedef SDL_FPoint Point;
 typedef SDL_FRect Rect;
+
 typedef struct
 {
 	float x, y;
 	float r;
 } Circle;
 
-typedef vec_t(Point) vec_p_t;
-typedef vec_t(Point) vec_point_t;
+typedef vec_t(Point*) vec_p_t;
+typedef vec_t(Point*) vec_point_t;
 
 Point makePoint(float x, float y)
 {
@@ -133,7 +134,7 @@ bool qt_destroy(QuadTree* qt)
 	return true;
 }
 
-bool qt_insert(QuadTree* const, const Point);
+bool qt_insert(QuadTree* const, const Point* const);
 
 bool qt_subdivide(QuadTree* const qt)
 {
@@ -190,9 +191,9 @@ bool qt_subdivide(QuadTree* const qt)
 // Either store Point* or whenever you insert a new point balance the tree,
 // which sucks It should be a seperate function which the user can run or maybe
 // call it in subdivide();
-bool qt_insert(QuadTree* const qt, const Point p)
+bool qt_insert(QuadTree* const qt, const Point* const p)
 {
-	if(!pointInRect(&p, &qt->boundary))
+	if(!pointInRect(p, &qt->boundary))
 		return false;
 
 	if(qt->points.length < BUCKET_SIZE && !qt->north_west)
@@ -239,7 +240,7 @@ void qt_getPointsInRect(QuadTree* const qt, const Rect* const rect, vec_p_t* con
 		return;
 
 	for(uint8_t i = 0U; i < qt->points.length; ++i)
-		if(pointInRect(&qt->points.data[i], rect))
+		if(pointInRect(qt->points.data[i], rect))
 			vec_push(vec, qt->points.data[i]);
 
 	if(!qt->north_west)
@@ -261,7 +262,7 @@ void qt_getPointsInCircle(QuadTree* const qt,
 		return;
 
 	for(uint8_t i = 0U; i < qt->points.length; ++i)
-		if(pointInCircle(&qt->points.data[i], circle))
+		if(pointInCircle(qt->points.data[i], circle))
 			vec_push(vec, qt->points.data[i]);
 
 	if(!qt->north_west)

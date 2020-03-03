@@ -27,7 +27,7 @@ void insertPointsIntoQT(QuadTree* const qt, const SDL_FPoint* const point_array)
 {
 	for(uint32_t i = 0U; i < POINT_COUNT; ++i)
 	{
-		qt_insert(qt, point_array[i]);
+		qt_insert(qt, &point_array[i]);
 	}
 }
 
@@ -154,15 +154,17 @@ int main(void)
 		getFRect(&qt_frect_vec, game.qt);
 		query_circle.x = mouse.x;
 		query_circle.y = mouse.y;
-		filledCircleRGBA(render, query_circle.x, query_circle.y, 5U, 8U, 236U, 18U, 204U);
+		circleRGBA(
+			render, query_circle.x, query_circle.y, query_circle.r, 8U, 236U, 18U, 204U);
 
 		vec_clear(&queried_points);
 		qt_getPointsInCircle(game.qt, &query_circle, &queried_points);
 		for(int j = 0U; j < queried_points.length; ++j)
 		{
-			Point diff = makePoint(mouse.x - queried_points.data[j].x,
-								   mouse.y - queried_points.data[j].y);
-			applyForce(&queried_points.data[j], &diff);
+			/* Point diff = makePoint(mouse.x - queried_points.data[j]->x, */
+								   /* mouse.y - queried_points.data[j]->y); */
+			/* applyForce(queried_points.data[j], &diff); */
+			/* filledCircleRGBA(render, queried_points.data[j]->x, queried_points.data[j]->y, 2, 2, 255, 20, 240); */
 		}
 
 		SDL_RenderPresent(render);
@@ -184,3 +186,4 @@ int main(void)
 	SDL_Quit();
 	return 0;
 }
+
